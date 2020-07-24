@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"  
+             xmlns:foaf="http://xmlns.com/foaf/0.1/" 
+             xmlns:dc="http://purl.org/dc/elements/1.1/">
+             
+        <rdf:Description rdf:about="">
+            <dc:title>World war II</dc:title>
+            <dc:date>2018-01-25</dc:date>
+            <dc:author>Jan Bodnar</dc:author>
+        </rdf:Description>
+    </rdf:RDF>
+</x:xmpmeta>

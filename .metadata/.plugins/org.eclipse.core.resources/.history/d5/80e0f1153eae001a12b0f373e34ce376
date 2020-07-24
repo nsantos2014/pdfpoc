@@ -1,0 +1,47 @@
+package pdf;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import java.awt.Container;
+import java.awt.Image;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URL;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+
+public class JsonExtract {
+	public static void main(String[] args) {
+		JSONParser parser = new JSONParser();
+		Image image = null;
+		try {
+			Object obj = parser.parse(new FileReader("/Users/gabagustin/eclipse-workspace/pdf/json/images.json"));
+
+			JSONObject jsonObject = (JSONObject) obj;
+	        try {
+	            URL url = new URL(jsonObject.get("Image").toString());
+	            image = ImageIO.read(url);
+	            
+	        } catch (IOException e) {
+	        	e.printStackTrace();
+	        }
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		JFrame frame = new JFrame();
+        frame.setSize(300, 300);
+        JLabel label = new JLabel(new ImageIcon(image));
+        frame.add(label);
+        frame.setVisible(true);
+        
+        
+        
+		
+	}
+}

@@ -1,0 +1,33 @@
+package pdf;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import java.awt.Image;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Iterator;
+
+import javax.imageio.ImageIO;
+
+public class JsonExtract {
+	public static void main(String[] args) {
+		JSONParser parser = new JSONParser();
+		try {
+			Object obj = parser.parse(new FileReader("/Users/gabagustin/eclipse-workspace/pdf/json/images.json"));
+
+			JSONObject jsonObject = (JSONObject) obj;
+			Image image = null;
+	        try {
+	            URL url = new URL(jsonObject.get("Image").toString());
+	            image = ImageIO.read(url);
+	        } catch (IOException e) {
+	        	e.printStackTrace();
+	        }
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+}

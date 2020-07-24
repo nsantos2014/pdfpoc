@@ -1,0 +1,68 @@
+package pdf;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.apache.pdfbox.multipdf.Splitter;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.common.PDMetadata;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
+public class SplitPdf {
+
+	public void split() {
+		File file = new File("C:/Users/GabeA/Documents/pdf/pdf/helloworld.pdf");
+		PDDocument document = PDDocument.load(file);
+		
+		Splitter splitter = new Splitter();
+		List<PDDocument> pages = splitter.split(document);
+		Iterator<PDDocument> iterator = pages.listIterator();
+		
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setNamespaceAware(true);
+		DocumentBuilder builder;
+		Document doc = null;
+		
+		MergePdf coverpg = new MergePdf();
+		try {
+			builder = factory.newDocumentBuilder();
+			doc = builder.parse("metadata.xml");
+
+			// Create XPathFactory object
+			XPathFactory xpathFactory = XPathFactory.newInstance();
+
+			// Create XPath object
+			XPath xpath = xpathFactory.newXPath();
+			
+			int totalPages = 4;
+			int startPage = 1;
+			int endPage = totalPages; // will change
+			int i = 1;
+
+					for(int pageNum = startPage; pageNum<totalPages; pageNum++){
+						
+					    if(document.getPage(pageNum).equals(doc)) {
+					        endPage = pageNum;
+					        
+					        document.save("/Users/gabagustin/eclipse-workspace/pdf/pdf/split_" + i + ".pdf");
+					        i++;
+					        startPage = (pageNum + 1);
+					    }
+					}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}

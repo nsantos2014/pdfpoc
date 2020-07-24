@@ -1,0 +1,46 @@
+package pdf;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class JsonExtract {
+	public static void main(String[] args) throws InvalidPasswordException, IOException {
+		JSONParser parser = new JSONParser();
+		
+		try {
+		        PDDocument doc = new PDDocument();
+		        
+		        PDPage page = doc.getPage(1);  
+		        
+		        Object obj = parser.parse(new FileReader("/Users/gabagustin/eclipse-workspace/pdf/json/images.json"));
+
+				JSONObject jsonObject = (JSONObject) obj;
+		        PDImageXObject pdImage = PDImageXObject.createFromFile(jsonObject.get("Image").toString(),doc); 
+	            
+		        PDPageContentStream contents = new PDPageContentStream(doc, page);
+		        
+		        contents.drawImage(pdImage, 100, 100);  
+		        page = doc.getPage(1);
+		        
+		        contents.beginText();
+		        contents.setFont( PDType1Font.TIMES_ROMAN, 16 ); 
+		        contents.newLineAtOffset(25, 725); 
+		        contents.showText(jsonObject.get("Name").toString());
+		        contents.endText(); 
+		        contents.close(); 
+		        doc.save("/Users/gabagustin/eclipse-workspace/pdf/pdf/test.pdf"); 
+		        doc.close();  
+	         
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		} 
+	}
+}

@@ -1,0 +1,58 @@
+package pdf;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;import javax.xml.xpath.XPathFactory;
+
+import org.apache.pdfbox.multipdf.Splitter;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.common.PDMetadata;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
+public class SplitPdf {
+
+	public static void split()
+			throws IOException, ParserConfigurationException, SAXException, XPathExpressionException {
+		DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+		Document doc = docBuilder.parse(new File("metadata.xml"));
+
+		XPathFactory xpathFactory = XPathFactory.newInstance();
+		XPath xpath = xpathFactory.newXPath();
+		XPathExpression expr = xpath.compile("<dc:title>metadata</dc:title>");
+
+		File file = new File("C:/Users/GabeA/Documents/pdf/pdf/helloworld.pdf");
+		PDDocument document = PDDocument.load(file);
+		Splitter splitter = new Splitter();
+		List<PDDocument> pages = splitter.split(document);
+		Iterator<PDDocument> iterator = pages.listIterator();
+		
+		 public void metaDataXml() {
+		        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		        factory.setNamespaceAware(true);
+		        DocumentBuilder builder;
+		        Document doc = null;
+		        try {
+		            builder = factory.newDocumentBuilder();
+		            doc = builder.parse("employees.xml");
+
+		            // Create XPathFactory object
+		            XPathFactory xpathFactory = XPathFactory.newInstance();
+
+		            // Create XPath object
+		            XPath xpath = xpathFactory.newXPath();
+
+
+	}
+}
+
+

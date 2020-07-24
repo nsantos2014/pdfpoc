@@ -1,0 +1,21 @@
+package pdf;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
+import java.io.FileReader;
+import java.util.Iterator;
+
+public class JsonExtract {
+	public static void main(String[] args) {
+		JSONParser parser = new JSONParser();
+		try {
+			Object obj = parser.parse(new FileReader("/Users/Shared/crunchify.json"));
+
+			JSONObject jsonObject = (JSONObject) obj;
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+}

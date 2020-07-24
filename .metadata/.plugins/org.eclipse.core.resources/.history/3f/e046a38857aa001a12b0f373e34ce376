@@ -1,0 +1,23 @@
+"imageList": [
+	{
+		"image_1": "/animals/1",
+		"image_2": "/animals/2",
+		"image_3": "/animals/3",
+		"image_4": "/animals/4",
+		"image_5": "/animals/5",
+		"image_6": "/cats/1",
+		"image_7": "/cats/2",
+		"image_8": "/cats/3",
+		"image_9": "/cats/4",
+		"image_10": "/cats/5",
+		"image_11": "/cats/6",
+	}
+]vararr=Object.values(json.imageList[
+	0
+]);$('.ir_image_holder.ir_img_src').each(function(){
+	varnum=Math.floor(Math.random()*11+1),
+	img=$(this);img.attr('src',
+	'http: 	//lorempixel.com/100/100' + arr[num] + '');
+img.attr('datalock',
+	num);
+});

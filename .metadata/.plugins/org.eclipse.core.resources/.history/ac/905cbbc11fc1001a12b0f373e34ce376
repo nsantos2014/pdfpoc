@@ -1,0 +1,178 @@
+package pdf;
+
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.xml.transform.TransformerException;
+
+import org.apache.pdfbox.cos.COSBase;
+import org.apache.pdfbox.cos.COSDictionary;
+import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.io.IOUtils;
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.multipdf.PDFCloneUtility;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.common.PDMetadata;
+import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.krysalis.barcode4j.impl.code128.Code128Bean;
+import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
+
+public class MergePdf {
+
+	// Can use a list of files instead of objects
+	// private final List<Object> sources;
+	private final List<File> sources;
+
+	float margin = 25;
+	float y = 700;
+
+	public MergePdf() {
+		sources = new ArrayList<>();
+		// adding the files in constructor. the constructor can receive a file list
+		// instead
+		sources.add(new File("/Users/gabagustin/eclipse-workspace/pdf/pdf/hello.pdf"));
+		sources.add(new File("/Users/gabagustin/eclipse-workspace/pdf/pdf/world.pdf"));
+	}
+
+	public void merge(MemoryUsageSetting memUsageSetting) throws IOException, TransformerException {
+		try (PDDocument destination = new PDDocument(memUsageSetting)) {
+			PDFCloneUtility cloner = new PDFCloneUtility(destination);
+			for (File sourceFile : sources) {
+				PDDocument sourceDoc = null;
+				try {
+					sourceDoc = PDDocument.load(sourceFile);
+					coverPage(destination, "I am a cover page");
+					for (PDPage page : sourceDoc.getPages()) {
+						PDPage newPage = new PDPage((COSDictionary) cloner.cloneForNewDocument(page.getCOSObject()));
+						newPage.setCropBox(page.getCropBox());
+						newPage.setMediaBox(page.getMediaBox());
+						newPage.setRotation(page.getRotation());
+						PDResources resources = page.getResources();
+						if (resources != null) {
+							// this is smart enough to just create references for resources that are used on
+							// multiple
+							// pages
+							newPage.setResources(
+									new PDResources((COSDictionary) cloner.cloneForNewDocument(resources)));
+						} else {
+							newPage.setResources(new PDResources());
+						}
+						destination.addPage(newPage);
+					}
+				} finally {
+					IOUtils.closeQuietly(sourceDoc);
+				}
+			}
+			destination.save("/Users/gabagustin/eclipse-workspace/pdf/pdf/helloworld.pdf");
+		}
+	}
+
+	public void coverPage(PDDocument destination, String message) throws IOException, TransformerException {
+		PDPage page = new PDPage();
+
+		PDPageContentStream content = new PDPageContentStream(destination, page);
+
+		content.beginText();
+		content.setFont(PDType1Font.HELVETICA, 12);
+		content.newLineAtOffset(250, 700);
+		content.showText(message);
+		content.endText();
+		content.close();
+		
+//		 File myFile = new File("/Users/gabagustin/eclipse-workspace/pdf/metadata.xml");
+//         
+//         try (InputStream is = Files.newInputStream(myFile.toPath())) {
+//             
+//             PDMetadata meta = new PDMetadata(destination, is);
+//             page.setMetadata(meta);
+//         }
+
+//		image(destination, page);
+
+		addBarcode128(destination, page, "123456789", margin, y);
+	}
+
+//	public void image(PDDocument doc, PDPage page) throws IOException {
+//
+//		PDImageXObject pdImage = PDImageXObject.createFromFile("/Users/gabagustin/eclipse-workspace/pdf/img", doc);
+//
+//		PDPageContentStream contents = new PDPageContentStream(doc, page);
+//
+//		contents.drawImage(pdImage, 200, 200);
+//
+//		contents.close();
+//
+//	}
+
+	public void addBarcode128(PDDocument document, PDPage page, String text, float x, float y) {
+
+		try {
+
+			PDPageContentStream contentStream = new PDPageContentStream(document, page,
+					PDPageContentStream.AppendMode.APPEND, true);
+
+			int dpi = 300;
+			BitmapCanvasProvider canvas = new BitmapCanvasProvider(dpi, BufferedImage.TYPE_BYTE_BINARY, false, 0);
+			Code128Bean code128Bean = new Code128Bean();
+			code128Bean.generateBarcode(canvas, text.trim());
+			canvas.finish();
+			BufferedImage bImage = canvas.getBufferedImage();
+
+			PDImageXObject image = JPEGFactory.createFromImage(document, bImage);
+			contentStream.drawImage(image, x, y, 100, 50);
+			contentStream.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void optimizeSize() throws InvalidPasswordException, IOException {
+
+		File file = new File("/Users/gabagustin/eclipse-workspace/pdf/pdf/helloworld.pdf");
+
+		PDDocument doc = PDDocument.load(file);
+		Map<String, COSBase> fontFileCache = new HashMap<>();
+		for (int pageNumber = 0; pageNumber < doc.getNumberOfPages(); pageNumber++) {
+			final PDPage page = doc.getPage(pageNumber);
+			COSDictionary pageDictionary = (COSDictionary) page.getResources().getCOSObject()
+					.getDictionaryObject(COSName.FONT);
+			for (COSName currentFont : pageDictionary.keySet()) {
+				COSDictionary fontDictionary = (COSDictionary) pageDictionary.getDictionaryObject(currentFont);
+				for (COSName actualFont : fontDictionary.keySet()) {
+					COSBase actualFontDictionaryObject = fontDictionary.getDictionaryObject(actualFont);
+					if (actualFontDictionaryObject instanceof COSDictionary) {
+						COSDictionary fontFile = (COSDictionary) actualFontDictionaryObject;
+						if (fontFile.getItem(COSName.FONT_NAME) instanceof COSName) {
+							COSName fontName = (COSName) fontFile.getItem(COSName.FONT_NAME);
+							fontFileCache.computeIfAbsent(fontName.getName(),
+									key -> fontFile.getItem(COSName.FONT_FILE2));
+							fontFile.setItem(COSName.FONT_FILE2, fontFileCache.get(fontName.getName()));
+						}
+					}
+				}
+			}
+		}
+
+		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		doc.save(baos);
+		final File compressed = new File("/Users/gabagustin/eclipse-workspace/pdf/pdf/helloworld_compressed.pdf");
+		baos.writeTo(new FileOutputStream(compressed));
+	}
+}

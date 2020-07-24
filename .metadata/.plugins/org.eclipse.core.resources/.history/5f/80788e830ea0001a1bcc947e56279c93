@@ -1,0 +1,31 @@
+package pdf;
+
+import java.io.IOException;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.xpath.XPathExpressionException;
+
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.xml.sax.SAXException;
+
+@SpringBootApplication
+public class TestPdf {
+
+	public static void main(String[] args) throws IOException, TransformerException, XPathExpressionException,
+			ParserConfigurationException, SAXException {
+		SpringApplication.run(TestPdf.class, args);
+
+		CreatePdf createpdf = new CreatePdf();
+		createpdf.create("C:/Users/GabeA/Documents/pdf/pdf/hello.pdf", "hello");
+		createpdf.create("C:/Users/GabeA/Documents/pdf/pdf/world.pdf", "world");
+
+		MergePdf mergepdf = new MergePdf();
+		mergepdf.merge(MemoryUsageSetting.setupMainMemoryOnly());
+
+		SplitPdf.split();
+	}
+
+}

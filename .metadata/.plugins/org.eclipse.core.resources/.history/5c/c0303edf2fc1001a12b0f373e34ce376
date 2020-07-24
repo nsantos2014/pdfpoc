@@ -1,0 +1,38 @@
+package pdf;
+
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.pdfbox.multipdf.Splitter;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.encryption.InvalidPasswordException;
+
+public class SplitPdf {
+
+	public void split() throws InvalidPasswordException, IOException {
+		File file = new File("/Users/gabagustin/eclipse-workspace/pdf/pdf/helloworld.pdf");
+		PDDocument document = PDDocument.load(file);
+		
+		Splitter splitter = new Splitter();
+
+		try {
+			int totalPages = 4;
+			int startPage = 1;
+			int endPage = totalPages; // will change
+
+			for (int pageNum = startPage; pageNum < totalPages; pageNum++) {
+
+				if (document.getPage(pageNum).getMetadata() != null) {
+					splitter.setEndPage(endPage = pageNum);
+					splitter.setStartPage(startPage = (pageNum + 1));
+
+					splitter.setSplitAtPage(toPage - fromPage +1 );
+				}
+				document.save("/Users/gabagustin/eclipse-workspace/pdf/pdf/split_.pdf");
+			}
+			document.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+}
